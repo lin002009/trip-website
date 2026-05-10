@@ -1,0 +1,793 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+:root{--sakura:#D4537E;--sakura-light:#FBEAF0;--sakura-mid:#ED93B1;--gold:#BA7517;--gold-light:#FAEEDA;--ink:#2C2C2A;--muted:#5F5E5A;--bg:var(--color-background-primary);--bg2:var(--color-background-secondary);--border:var(--color-border-tertiary)}
+.app{max-width:390px;margin:0 auto;min-height:600px;display:flex;flex-direction:column}
+.header{background:var(--sakura-light);padding:1rem 1.25rem 0.75rem;border-bottom:0.5px solid var(--border)}
+.header-title{font-size:11px;color:var(--sakura);letter-spacing:0.12em;text-transform:uppercase;font-weight:500;margin-bottom:2px}
+.header-main{font-size:20px;font-weight:500;color:#4B1528}
+.header-sub{font-size:13px;color:#993556;margin-top:2px}
+.tab-bar{display:flex;border-bottom:0.5px solid var(--border);background:var(--bg)}
+.tab{flex:1;padding:10px 4px;text-align:center;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab.active{color:var(--sakura);border-bottom-color:var(--sakura);font-weight:500}
+.tab i{display:block;font-size:18px;margin-bottom:2px}
+.content{flex:1;overflow-y:auto;padding:0.75rem 1rem 2rem}
+.day-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--border-radius-lg);margin-bottom:0.75rem;overflow:hidden;cursor:pointer}
+.day-header{display:flex;align-items:center;gap:10px;padding:0.75rem 1rem}
+.day-dot{width:36px;height:36px;border-radius:50%;background:var(--sakura-light);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.day-dot i{font-size:18px;color:var(--sakura)}
+.day-info{flex:1}
+.day-num{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0.05em}
+.day-title{font-size:15px;font-weight:500;color:var(--ink)}
+.day-subtitle{font-size:12px;color:var(--muted);margin-top:1px}
+.day-arrow{font-size:16px;color:var(--muted);transition:transform 0.2s}
+.day-card.open .day-arrow{transform:rotate(90deg)}
+.day-items{display:none;border-top:0.5px solid var(--border)}
+.day-card.open .day-items{display:block}
+.time-group{padding:0.6rem 1rem}
+.time-label{font-size:10px;color:var(--sakura);font-weight:500;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem;display:flex;align-items:center;gap:6px}
+.time-label::after{content:'';flex:1;height:0.5px;background:var(--sakura-light)}
+.item{display:flex;gap:8px;align-items:flex-start;padding:5px 0}
+.item-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.item-icon.transport{background:#E6F1FB;color:#185FA5}
+.item-icon.sight{background:#EAF3DE;color:#3B6D11}
+.item-icon.food{background:#FAEEDA;color:#854F0B}
+.item-icon.hotel{background:#FBEAF0;color:#993556}
+.item-body{flex:1}
+.item-name{font-size:13px;color:var(--ink);line-height:1.4}
+.item-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:4px;margin-left:4px;font-weight:500}
+.badge.booked{background:#EAF3DE;color:#27500A}
+.badge.buy{background:#F1EFE8;color:#444441}
+.badge.cost{background:var(--gold-light);color:#633806}
+.section-title{font-size:14px;font-weight:500;color:var(--ink);margin:0.5rem 0 0.75rem}
+.budget-card{background:var(--bg2);border-radius:var(--border-radius-md);padding:0.9rem 1rem;margin-bottom:0.75rem}
+.budget-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0}
+.budget-label{font-size:13px;color:var(--muted)}
+.budget-value{font-size:14px;font-weight:500;color:var(--ink)}
+.budget-big{font-size:22px;font-weight:500;color:#4B1528}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;margin:0.5rem 0;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:var(--sakura)}
+.cat-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:0.5px solid var(--border)}
+.cat-row:last-child{border:none}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-name{font-size:13px;color:var(--ink);flex:1}
+.cat-bar-wrap{width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.cat-bar{height:100%;border-radius:3px}
+.cat-amt{font-size:12px;color:var(--muted);min-width:52px;text-align:right}
+.info-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--border-radius-lg);padding:0.9rem 1rem;margin-bottom:0.75rem}
+.info-row{display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:0.5px solid var(--border)}
+.info-row:last-child{border:none}
+.info-icon{font-size:16px;color:var(--sakura);margin-top:1px;width:20px;text-align:center}
+.info-content{flex:1}
+.info-title{font-size:13px;font-weight:500;color:var(--ink)}
+.info-desc{font-size:12px;color:var(--muted);margin-top:1px;line-height:1.4}
+.note-box{background:var(--gold-light);border-radius:var(--border-radius-md);padding:0.7rem 0.9rem;margin-top:0.5rem}
+.note-text{font-size:12px;color:#633806;line-height:1.5}
+</style>
+
+<h2 class="sr-only">京阪旅遊 2026 手機行程 App，包含每日行程與預算資訊</h2>
+
+<div class="app">
+  <div class="header">
+    <div class="header-title"><i class="ti ti-torii" aria-hidden="true"></i> 京阪旅遊 2026</div>
+    <div class="header-main">京都 · 大阪</div>
+    <div class="header-sub">5/15（四）— 5/22（四）· 8天7夜</div>
+  </div>
+
+  <div class="tab-bar">
+    <div class="tab active" onclick="showTab('itinerary',this)"><i class="ti ti-calendar-event" aria-hidden="true"></i>行程</div>
+    <div class="tab" onclick="showTab('budget',this)"><i class="ti ti-wallet" aria-hidden="true"></i>預算</div>
+    <div class="tab" onclick="showTab('info',this)"><i class="ti ti-info-circle" aria-hidden="true"></i>資訊</div>
+  </div>
+
+  <div class="content" id="tab-itinerary">
+
+    <!-- Day 1 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-plane-departure" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 1 · 5/15（四）</div>
+          <div class="day-title">桃園 → 關西機場</div>
+          <div class="day-subtitle">啟程日 · 入住京都</div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">早上</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">計程車→基隆06:17→台北07:02→機捷桃園機場</div>
+              <div class="item-meta">現場買票 · 機捷$160 + Uber約$205</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-plane" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">桃園機場 → 關西機場<span class="badge buy">ugo $1,045</span></div>
+              <div class="item-meta">11:05出發 → 14:50抵達 · 機票$11,650</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">下午</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-bus" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">立木津巴士 → 京都車站八條口</div>
+              <div class="item-meta">可用IC card · 車程約1.5小時 · ¥2,800</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">晚上</div>
+          <div class="item">
+            <div class="item-icon hotel"><i class="ti ti-building" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">ホテルヴィスキオ京都 by GRANVIA<span class="badge booked">已預約</span></div>
+              <div class="item-meta">¥33,461 · Check in 15:00 · 早餐¥4,500（6:30-10:30）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 2 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-torii" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 2 · 5/16（五）</div>
+          <div class="day-title">宇治 → 伏見稻荷</div>
+          <div class="day-subtitle">平等院 · 千本鳥居</div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">早上</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">JR奈良線 京都→宇治</div>
+              <div class="item-meta">08:01發 → 08:24抵 · ¥240</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-building-temple" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">平等院<span class="badge buy">現場買票</span></div>
+              <div class="item-meta">鳳凰堂預約 9:10 · ¥300 · 庭院¥700 · 合計¥1,000</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">下午</div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-coffee" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">茶房 櫟（午餐）</div>
+              <div class="item-meta">預算¥3,000 · 備案：にくがうまい店 Food Park</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-star" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">宇治上神社</div>
+              <div class="item-meta">兔子御籤¥500</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-cup" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">中村藤吉本店 宇治本店（點心）</div>
+              <div class="item-meta">預算¥2,500</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">JR奈良線 宇治→稻荷</div>
+              <div class="item-meta">15:22發 → 15:38抵 · ¥240</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">晚上</div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-torii" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">伏見稻荷大社</div>
+              <div class="item-meta">千本鳥居 · 免費參觀</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-bowl" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">サーモンnoodle京都（晚餐）</div>
+              <div class="item-meta">預算¥1,500 · 備案：土雷門、美食街</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">JR奈良線 稻荷→京都 · ¥150</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 3 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-trees" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 3 · 5/17（六）</div>
+          <div class="day-title">嵐山 → 下鴨神社</div>
+          <div class="day-subtitle">竹林小徑 · 野宮神社</div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">早上</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">JR嵯峨野線 京都→嵯峨嵐山</div>
+              <div class="item-meta">07:18發 → 07:35抵 · ¥240</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-bus" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">市公車93 嵯峨嵐山駅前→嵐山天龍寺前</div>
+              <div class="item-meta">07:40發 · ¥230</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-coffee" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">Bread, Espresso & 嵐山庭園（早餐）</div>
+              <div class="item-meta">預算¥3,000</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-tree" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">野宮神社 · 竹林小徑 · 嵐山商店街</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">下午</div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-cup" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">Cafe 嵯峨野湯</div>
+              <div class="item-meta">預算¥2,000 · 備案：舞妓飯（預約制¥3,850）</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">嵐電→西大路三條 + 市公車205→下鴨神社前</div>
+              <div class="item-meta">¥250 + ¥230 · 車程共約56分鐘</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-building-temple" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">下鴨神社</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">晚上</div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-shopping-bag" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">京都車站 · 京都塔 · AEON永旺 · AVANTI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 4 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-shrine" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 4 · 5/18（日）</div>
+          <div class="day-title">清水寺 → 難波</div>
+          <div class="day-subtitle">京都→大阪 · 入住難波</div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">早上</div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-building-temple" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">清水寺<span class="badge buy">¥500</span></div>
+              <div class="item-meta">計程車前往 · 約¥2,000</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-walk" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">三年坂 → 二年坂 → 八坂庚申堂 → 安井金比羅宮 → 八阪神社</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-coffee" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">星巴克京都二寧坂ヤサカ茶屋店</div>
+              <div class="item-meta">預算¥1,600</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">下午</div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-meat" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">SHOGUN BURGER 祇園四条店（午餐）</div>
+              <div class="item-meta">預算¥3,160</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">JR新快速 京都→大阪 + 地鐵→難波→櫻川</div>
+              <div class="item-meta">¥820 · JR¥580 + 地鐵¥240</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon hotel"><i class="ti ti-building" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">Hotel Abitare Namba West<span class="badge booked">已預約</span></div>
+              <div class="item-meta">¥51,300 · Check in 16:00 · Check out 10:00</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">晚上</div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-building-store" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">難波 · 心齋橋逛街</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-grill" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">お好み焼 狸狸亭（晚餐）</div>
+              <div class="item-meta">預算¥2,000 · 備案：燒肉力丸¥4,158</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 5 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-castle" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 5 · 5/19（一）</div>
+          <div class="day-title">大阪城 → 梅田</div>
+          <div class="day-subtitle">藍天大樓 · 夕陽百選</div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">早上</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">地鐵千日前線 櫻川→谷町九丁目 + 谷町線→谷町四丁目</div>
+              <div class="item-meta">¥240 · 車程約15分</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-castle" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">大阪城<span class="badge buy">¥1,200</span></div>
+              <div class="item-meta">09:00開放 · 周遊券天守閣&遊船免費</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-bowl" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">大阪城周邊（午餐）</div>
+              <div class="item-meta">預算¥2,000</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">下午</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">地鐵大阪環狀線→大阪 · ¥180</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-building-skyscraper" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">梅田藍天大樓</div>
+              <div class="item-meta">¥2,000 · 周遊券15:00前免費 · 夕陽百選 · 排隊約1小時</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-shopping-bag" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">梅田百貨</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 6 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-roller-coaster" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 6 · 5/20（二）</div>
+          <div class="day-title">環球影城</div>
+          <div class="day-subtitle">USJ 全天暢遊<span class="badge booked" style="margin-left:6px">已預約</span></div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">交通</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">阪神難波線 櫻川→西九條 ¥220</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">JR夢咲線 西九條→環球城 ¥180</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">景點</div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-roller-coaster" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">環球影城 Universal Studios Japan</div>
+              <div class="item-meta">門票¥19,800（已預約）· 全天遊玩</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">回程</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">JR夢咲線→西九條 + 阪神難波線→櫻川</div>
+              <div class="item-meta">¥180 + ¥220</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 7 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-fish" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 7 · 5/21（三）</div>
+          <div class="day-title">難波八阪神社 → 海遊館</div>
+          <div class="day-subtitle">水族館 · 餵食秀</div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">早上</div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-building-temple" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">難波八阪神社</div>
+              <div class="item-meta">地鐵千日前線 櫻川→難波 ¥190</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-star" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">サムハラ神社</div>
+              <div class="item-meta">地鐵 難波→阿波座 ¥190</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon food"><i class="ti ti-pig" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">情熱のぶた（午餐）</div>
+              <div class="item-meta">預算¥1,380</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">下午</div>
+          <div class="item">
+            <div class="item-icon sight"><i class="ti ti-fish" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">海遊館<span class="badge booked">已預約 12:30入場</span></div>
+              <div class="item-meta">¥2,700（2人） · 餵食秀 13:20 · 營業至20:00</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">回程</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">地鐵 大阪港→阿波座→櫻川 ¥290</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Day 8 -->
+    <div class="day-card" onclick="toggleDay(this)">
+      <div class="day-header">
+        <div class="day-dot"><i class="ti ti-plane-arrival" aria-hidden="true"></i></div>
+        <div class="day-info">
+          <div class="day-num">DAY 8 · 5/22（四）</div>
+          <div class="day-title">關西機場 → 桃園</div>
+          <div class="day-subtitle">回程日 · 平安返家</div>
+        </div>
+        <i class="ti ti-chevron-right day-arrow" aria-hidden="true"></i>
+      </div>
+      <div class="day-items">
+        <div class="time-group">
+          <div class="time-label">下午</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-bus" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">立木津巴士 難波OCAT → 關西機場</div>
+              <div class="item-meta">12:20發 → 13:08抵 · ¥1,300 · 車程約50分鐘</div>
+            </div>
+          </div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-plane" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">關西機場 → 桃園機場<span class="badge booked">已預約</span></div>
+              <div class="item-meta">16:15出發 → 18:15抵達</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-group">
+          <div class="time-label">回台</div>
+          <div class="item">
+            <div class="item-icon transport"><i class="ti ti-train" aria-hidden="true"></i></div>
+            <div class="item-body">
+              <div class="item-name">機捷 → 台北車站 → 基隆</div>
+              <div class="item-meta">現場買票</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end tab-itinerary -->
+
+  <div class="content" id="tab-budget" style="display:none">
+    <div class="budget-card">
+      <div class="budget-row">
+        <span class="budget-label">旅遊預算</span>
+        <span class="budget-value">NT$100,000</span>
+      </div>
+      <div class="budget-row">
+        <span class="budget-label">目前已確認花費</span>
+        <span class="budget-big">NT$56,222</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:56.2%"></div></div>
+      <div class="budget-row">
+        <span class="budget-label">已使用 56.2%</span>
+        <span class="budget-value" style="color:#27500A">剩餘 $43,778</span>
+      </div>
+    </div>
+    <div class="budget-card">
+      <div class="budget-row">
+        <span class="budget-label">回饋 & 贊助總額</span>
+        <span class="budget-value" style="color:#27500A">-NT$1,935</span>
+      </div>
+      <div class="budget-row">
+        <span class="budget-label">實際花費（扣除回饋）</span>
+        <span class="budget-big">NT$54,288</span>
+      </div>
+    </div>
+
+    <div class="section-title">各類別比例</div>
+    <div class="budget-card" style="padding:0.75rem 1rem">
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#D4537E"></div>
+        <div class="cat-name">住宿</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:44%;background:#D4537E"></div></div>
+        <div class="cat-amt">NT$24,107</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#185FA5"></div>
+        <div class="cat-name">機票</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:43%;background:#185FA5"></div></div>
+        <div class="cat-amt">NT$23,300</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#3B6D11"></div>
+        <div class="cat-name">門票</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:9%;background:#3B6D11"></div></div>
+        <div class="cat-amt">NT$5,093</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#854F0B"></div>
+        <div class="cat-name">交通</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:4%;background:#854F0B"></div></div>
+        <div class="cat-amt">NT$2,027</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#5F5E5A"></div>
+        <div class="cat-name">保險</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:2%;background:#5F5E5A"></div></div>
+        <div class="cat-amt">NT$733</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#993556"></div>
+        <div class="cat-name">網路 eSIM</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:1%;background:#993556"></div></div>
+        <div class="cat-amt">NT$598</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#888780"></div>
+        <div class="cat-name">其他</div>
+        <div class="cat-bar-wrap"><div class="cat-bar" style="width:1%;background:#888780"></div></div>
+        <div class="cat-amt">NT$365</div>
+      </div>
+    </div>
+
+    <div class="section-title">付款方式</div>
+    <div class="budget-card" style="padding:0.75rem 1rem">
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#185FA5"></div>
+        <div class="cat-name">台新Richart卡</div>
+        <div class="cat-amt" style="min-width:0;flex:1;text-align:right;font-size:13px">¥768 回饋</div>
+        <div class="cat-amt">NT$23,665</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#D4537E"></div>
+        <div class="cat-name">玉山熊本熊日幣卡</div>
+        <div class="cat-amt" style="min-width:0;flex:1;text-align:right;font-size:13px">¥764 回饋</div>
+        <div class="cat-amt">NT$16,505</div>
+      </div>
+      <div class="cat-row">
+        <div class="cat-dot" style="background:#3B6D11"></div>
+        <div class="cat-name">富邦J卡</div>
+        <div class="cat-amt" style="min-width:0;flex:1;text-align:right;font-size:13px">¥403 回饋</div>
+        <div class="cat-amt">NT$14,877</div>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <div class="note-text">匯率：0.22（日圓換台幣）<br>飲食、購物、御朱印等現場消費尚未統計，請預留約 NT$40,000 的現金預算。</div>
+    </div>
+  </div>
+
+  <div class="content" id="tab-info" style="display:none">
+    <div class="section-title">住宿資訊</div>
+    <div class="info-card">
+      <div class="info-row">
+        <i class="ti ti-building info-icon" aria-hidden="true"></i>
+        <div class="info-content">
+          <div class="info-title">京都｜ホテルヴィスキオ京都 by GRANVIA</div>
+          <div class="info-desc">〒601-8002 京都市南区東九条上殿田町44番地1<br>Check in 15:00 / Check out 11:00<br>早餐 6:30–10:30 · ¥4,500</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-building info-icon" aria-hidden="true"></i>
+        <div class="info-content">
+          <div class="info-title">大阪｜Hotel Abitare Namba West</div>
+          <div class="info-desc">〒556-0021 大阪府大阪市浪速区幸町2-2-44<br>Check in 16:00 / Check out 10:00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">交通 Tips</div>
+    <div class="info-card">
+      <div class="info-row">
+        <i class="ti ti-credit-card info-icon" aria-hidden="true"></i>
+        <div class="info-content">
+          <div class="info-title">IC Card（Suica / ICOCA）</div>
+          <div class="info-desc">抵達關西機場即可購買或儲值 ICOCA，京阪地區公車、地鐵、JR 通用</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-phone info-icon" aria-hidden="true"></i>
+        <div class="info-content">
+          <div class="info-title">網路｜SIMPLE eSIM 20G / 5G不降速</div>
+          <div class="info-desc">NT$598 · 已購買，出發前記得啟用</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-shield-check info-icon" aria-hidden="true"></i>
+        <div class="info-content">
+          <div class="info-title">旅遊保險</div>
+          <div class="info-desc">富邦新公教卡 計劃二600萬 · NT$733</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">海遊館展示資訊</div>
+    <div class="info-card">
+      <div class="info-row">
+        <i class="ti ti-fish info-icon" aria-hidden="true"></i>
+        <div class="info-content">
+          <div class="info-title">各區展示生物</div>
+          <div class="info-desc">7F：海獅·海豹（蒙特雷灣）/ 水獺（日本森林）/ 海豚（塔斯曼海）/ 企鵝（南極大陸）<br>6F：太平洋的魚類<br>4F：南跳岩企鵝（福克蘭群島）/ 環斑海豹（北極圈）</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-clock info-icon" aria-hidden="true"></i>
+        <div class="info-content">
+          <div class="info-title">入場時間 & 餵食秀</div>
+          <div class="info-desc">預約入場：12:30–12:45<br>餵食秀：13:20 開始<br>營業至 20:00</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">已預訂清單</div>
+    <div class="info-card">
+      <div class="info-row">
+        <i class="ti ti-check info-icon" style="color:#27500A" aria-hidden="true"></i>
+        <div class="info-content"><div class="info-title">機票（去回）</div><div class="info-desc">ugo ¥1,045 · 機票 NT$11,650</div></div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-check info-icon" style="color:#27500A" aria-hidden="true"></i>
+        <div class="info-content"><div class="info-title">京都飯店 GRANVIA</div><div class="info-desc">¥66,922 · 5/15–5/18</div></div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-check info-icon" style="color:#27500A" aria-hidden="true"></i>
+        <div class="info-content"><div class="info-title">大阪飯店 Abitare Namba West</div><div class="info-desc">¥51,300 · 5/18–5/22</div></div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-check info-icon" style="color:#27500A" aria-hidden="true"></i>
+        <div class="info-content"><div class="info-title">環球影城門票</div><div class="info-desc">2人 · ¥19,800 · 5/20</div></div>
+      </div>
+      <div class="info-row">
+        <i class="ti ti-check info-icon" style="color:#27500A" aria-hidden="true"></i>
+        <div class="info-content"><div class="info-title">海遊館門票</div><div class="info-desc">2人 · ¥2,700 · 12:30 入場 · 5/21</div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showTab(name, el) {
+  ['itinerary','budget','info'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function toggleDay(card) {
+  card.classList.toggle('open');
+}
+</script>
